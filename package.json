@@ -1,0 +1,36 @@
+{
+    "name": "node-red-contrib-duckdb",
+    "version": "0.0.4",
+    "description": "Node-red node for duckdb",
+    "dependencies": {
+        "duckdb": "^0.6.1"
+    },
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "license": "MIT License",
+    "keywords": [
+      "node-red",
+      "node-red-contrib",
+      "duckdb",
+      "table-viewer"
+    ],
+      "repository": {
+      "type": "git",
+      "url": "https://github.com/GuanyiLi-Craig/node-red-contrib-duckdb"
+    },
+    "node-red": {
+      "nodes": {
+        "table-viewer": "src/duckdb_node.js"
+      }
+    },
+    "author": {
+      "name": "Craig Li",
+      "email": "craig.guanyi.li@gmail.com",
+      "url": "https://github.com/GuanyiLi-Craig/node-red-contrib-duckdb"
+    },
+    "readmeFilename": "README.md",
+    "bugs": {
+      "url": "https://github.com/GuanyiLi-Craig/node-red-contrib-duckdb"
+    }
+  }
