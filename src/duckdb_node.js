@@ -9,7 +9,6 @@ module.exports = function(RED) {
         var node = this;
 
         node.doConnect = function() {
-            console.log(node);
             if (node.db) { return; }
             node.db = new duckdb.Database(node.dbname);
         }
@@ -126,7 +125,6 @@ module.exports = function(RED) {
             }
 
             node.on("input", function(msg) {
-                console.log(node);
                 if (msg.hasOwnProperty("extension")) {
                     node.mydbConfig.db.loadExtension(msg.extension, function(err) {
                         if (err) { node.error(err,msg); }
