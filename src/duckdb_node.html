@@ -29,10 +29,10 @@
     <div class="form-row">
         <label for=""><i class="fa fa-code"></i>sql query</label>
         <select id="node-input-sqlquery">
-            <option value="msg.topic">msg.topic</option>
-            <option value="fixed">sql statement</option>
+            <option value="msg.sql">msg.sql exec</option>
+            <option value="exec">sql exec</option>
+            <option value="all">sql all</option>
             <option value="prepared">PS</option>
-            <option value="batch">batch</option>
         </select>
     </div>
     <div class="form-row" style="margin-bottom: 0px;">
@@ -52,7 +52,7 @@
         color:"#e97b00",
         defaults: {
             mydb: {type:"duckdb",required:true},
-            sqlquery: {value:"msg.topic",required:true},
+            sqlquery: {value:"msg.sql",required:true},
             sql: {value:""},
             name: {value:""}
         },
@@ -89,7 +89,7 @@
             });
 
             $("#node-input-sqlquery").change(function() {
-                if ($("#node-input-sqlquery").val() == "msg.topic" || $("#node-input-sqlquery").val() == "batch"){
+                if ($("#node-input-sqlquery").val() == "msg.sql"){
                     $("#node-input-sqllabel").hide();
                     $("#node-input-sql-editor").hide();
                 }
