@@ -1,6 +1,6 @@
 <script type="text/html" data-template-name="duckdb">
     <div class="form-row">
-        <label for="node-config-input-db"><i class="fa fa-database"></i> <span data-i18n="sqlite.label.database"></label>
+        <label for="node-config-input-db"><i class="fa fa-database"></i> Database</label>
         <input type="text" id="node-config-input-db" placeholder=":memory:">
     </div>
 </script>
@@ -17,7 +17,7 @@
     });
 </script>
 
-<script type="text/html" data-template-name="duckdbNode">
+<script type="text/html" data-template-name="duckdb-sql">
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
@@ -27,7 +27,7 @@
         <input type="text" id="node-input-mydb">
     </div>
     <div class="form-row">
-        <label for=""><i class="fa fa-code"></i>sql query</label>
+        <label for=""><i class="fa fa-code"></i> Sql Option</label>
         <select id="node-input-sqlquery">
             <option value="msg.sql">msg.sql exec</option>
             <option value="exec">sql exec</option>
@@ -47,7 +47,7 @@
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('duckdbNode',{
+    RED.nodes.registerType('duckdb-sql',{
         category: 'storage-input',
         color:"#e97b00",
         defaults: {
@@ -118,4 +118,21 @@
             this.editor.resize();
         }
     });
+</script>
+
+<script type="text/html" data-help-name="duckdb-sql">
+    <p>A basic node for duck db. 
+    <p><strong>Database:</strong><br/>
+    config database path, such as <b>/tmp/duckdb.db</b>. Or use <b>:memory:</b>. Please read offical docs <a href="https://duckdb.org/docs/connect">duck db docs</a></p>  
+    <p><strong>Sql Option:</strong><br/>
+    There are 4 options. 
+        <ul>
+            <li><b>msg.sql exec</b>: executes the sql query(ies) from input msg.sql, and does not return any result. <a href="https://duckdb.org/docs/api/nodejs/reference#module_duckdb..Connection+exec">duckdb exec</a></li>
+            <li><b>sql exec</b>: execute the sql query(ies) from code editor, and does not return any results. <a href="https://duckdb.org/docs/api/nodejs/reference#module_duckdb..Connection+exec">duckdb exec</a></li>
+            <li><b>sql all</b>: execute one sql query from code editor, and returns execution results. <a href="https://duckdb.org/docs/api/nodejs/reference#module_duckdb..Connection+all">duckdb all</a></li>
+            <li><b>PS</b>: execute the sql procedure statement from code editor, taken msg.params as parameters. msg.params must be an array. And does not return any results. <a href="https://duckdb.org/docs/api/c/prepared">example</a></li>
+        </ul>
+    </p>
+    <p><strong>Code Editor:</strong><br/>
+    Input SQL queries. </p>          
 </script>
