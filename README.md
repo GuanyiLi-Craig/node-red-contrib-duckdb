@@ -5,8 +5,6 @@ Basic node red node for [DuckDB](https://duckdb.org/docs/).
 
 ## Config
 
-![duckdb-sql-config](https://github.com/GuanyiLi-Craig/static-files/blob/b8d9a56b43eaf23249cd1c9e0f2c7bb448ba96ed/node-red-contrib-duckdb/duckdb_sql_config.png)
-
 #### Database:
 
 config database path, such as `/tmp/duckdb.db`. Or use `:memory:` Please read offical docs [DuckDB Docs](https://duckdb.org/docs/connect)
