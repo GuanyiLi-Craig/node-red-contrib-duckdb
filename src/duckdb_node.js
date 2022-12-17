@@ -25,7 +25,7 @@ module.exports = function(RED) {
     RED.nodes.registerType("duckdb",DuckDBNode);
 
 
-    function DuckDBNodeIn(n) {
+    function DuckDBNodeSql(n) {
         RED.nodes.createNode(this,n);
         this.mydb = n.mydb;
         this.sqlquery = n.sqlquery||"msg.sql";
@@ -95,7 +95,7 @@ module.exports = function(RED) {
                     }
                 }
                 if (node.sqlquery == "prepared") {
-                    if (typeof node.sql === 'string' && typeof msg.params !== "undefined" && typeof msg.params === "array") {
+                    if (typeof node.sql === 'string' && typeof msg.params !== "undefined" && typeof msg.params === "object") {
                         if (node.sql.length > 0) {
                             node.mydbConfig.con.prepare(node.sql, function(err, stmt) {
                                 stmt.all(...msg.params, function(err, row) {
@@ -117,9 +117,9 @@ module.exports = function(RED) {
                             node.error("msg.params not passed");
                             node.status({fill:"red",shape:"dot",text:"msg.params not defined"});
                         }
-                        else if (typeof msg.params != "array") {
-                            node.error("msg.params not an array");
-                            node.status({fill:"red",shape:"dot",text:"msg.params not an array"});
+                        else if (typeof msg.params != "object") {
+                            node.error("msg.params not an object");
+                            node.status({fill:"red",shape:"dot",text:"msg.params not an object"});
                         }
                     }
                 }
@@ -139,5 +139,5 @@ module.exports = function(RED) {
             node.error("DuckDB database not configured");
         }
     }
-    RED.nodes.registerType("duckdbNode",DuckDBNodeIn);
+    RED.nodes.registerType("duckdb-sql", DuckDBNodeSql);
 }
