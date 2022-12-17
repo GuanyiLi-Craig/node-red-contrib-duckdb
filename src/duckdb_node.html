@@ -32,6 +32,7 @@
             <option value="msg.sql">msg.sql exec</option>
             <option value="exec">sql exec</option>
             <option value="all">sql all</option>
+            <option value="each">sql each</option>
             <option value="prepared">PS</option>
         </select>
     </div>
@@ -130,6 +131,7 @@
             <li><b>msg.sql exec</b>: executes the sql query(ies) from input msg.sql, and does not return any result. <a href="https://duckdb.org/docs/api/nodejs/reference#module_duckdb..Connection+exec">duckdb exec</a></li>
             <li><b>sql exec</b>: execute the sql query(ies) from code editor, and does not return any results. <a href="https://duckdb.org/docs/api/nodejs/reference#module_duckdb..Connection+exec">duckdb exec</a></li>
             <li><b>sql all</b>: execute one sql query from code editor, and returns execution results. <a href="https://duckdb.org/docs/api/nodejs/reference#module_duckdb..Connection+all">duckdb all</a></li>
+            <li><b>sql each</b>: execute one sql query from code editor, and returns row by row. <a href="https://duckdb.org/docs/api/nodejs/reference#module_duckdb..Connection+each">duckdb each</a></li>
             <li><b>PS</b>: execute the sql procedure statement from code editor, taken msg.params as parameters. msg.params must be an array. And does not return any results. <a href="https://duckdb.org/docs/api/c/prepared">example</a></li>
         </ul>
     </p>

@@ -94,6 +94,25 @@ module.exports = function(RED) {
                         }
                     }
                 }
+                if (node.sqlquery == "each") {
+                    if (typeof node.sql === 'string') {
+                        if (node.sql.length > 0) {
+                            node.mydbConfig.con.each(node.sql, function(err, row) {
+                                if (err) { node.error(err, msg); }
+                                else {
+                                    msg.payload = row;
+                                    node.send(msg);
+                                }
+                            });
+                        }
+                    }
+                    else {
+                        if (node.sql === null || node.sql == "") {
+                            node.error("SQL statement config not set up",msg);
+                            node.status({fill:"red",shape:"dot",text:"SQL config not set up"});
+                        }
+                    }
+                }
                 if (node.sqlquery == "prepared") {
                     if (typeof node.sql === 'string' && typeof msg.params !== "undefined" && typeof msg.params === "object") {
                         if (node.sql.length > 0) {
