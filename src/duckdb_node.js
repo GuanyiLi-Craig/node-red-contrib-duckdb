@@ -159,4 +159,154 @@ module.exports = function(RED) {
         }
     }
     RED.nodes.registerType("duckdb-sql", DuckDBNodeSql);
+
+    function DuckDBImport(n) {
+        RED.nodes.createNode(this,n);
+
+        this.mydb = n.mydb;
+        this.duckdbimport = n.duckdbimport||"msg.import";
+        this.tablename = n.importtablename;
+        this.duckdbfile = n.duckdbimportfile;
+        this.mydbConfig = RED.nodes.getNode(this.mydb);
+        var node = this;
+        
+        if (node.mydbConfig) {
+            node.mydbConfig.doConnect();
+            node.status({fill:"green",shape:"dot",text:this.mydbConfig.dbname});
+
+            var doImport = function(msg) {
+                if (node.duckdbimport == "msg.import") {
+                    if (typeof msg.import === 'string') {
+                        node.mydbConfig.con.all(msg.import, function(err, row) {
+                            if (err) { node.error(err,msg); }
+                            else {
+                                msg.payload = row;
+                                node.send(msg);
+                            }
+                        });
+                    }
+                    else {
+                        node.error("msg.import : the query is not defined as a string",msg);
+                        node.status({fill:"red",shape:"dot",text:"msg.sql error"});
+                    }
+                }
+                if (node.duckdbimport == "import-csv") {
+                    if (typeof node.duckdbfile === 'string' && typeof node.tablename === 'string') {
+                        if (node.duckdbfile.length > 0 && node.tablename.length > 0) {
+                            var csvImportSql = "CREATE TABLE " + node.tablename + " AS SELECT * FROM '" + node.duckdbfile + "';";
+                            node.mydbConfig.con.all(csvImportSql, function(err, row) {
+                                if (err) { node.error(err, msg); }
+                                else {
+                                    msg.payload = row;
+                                    node.send(msg);
+                                }
+                            });
+                        }
+                    }
+                    else {
+                        node.error("SQL csv import config not set up",msg);
+                        node.status({fill:"red",shape:"dot",text:"SQL import config not set up"});
+                    }
+                }
+                if (node.duckdbimport == "import-parquet") {
+                    if (typeof node.duckdbfile === 'string' && typeof node.tablename === 'string') {
+                        if (node.duckdbfile.length > 0 && node.tablename.length > 0) {
+                            var parquetImportSql = "CREATE TABLE " + node.tablename + " AS SELECT * FROM read_parquet('" + node.duckdbfile + "');";
+                            node.mydbConfig.con.all(parquetImportSql, function(err, row) {
+                                if (err) { node.error(err, msg); }
+                                else {
+                                    msg.payload = row;
+                                    node.send(msg);
+                                }
+                            });
+                        }
+                    }
+                    else {
+                        node.error("SQL parquet import config not set up",msg);
+                        node.status({fill:"red",shape:"dot",text:"SQL import config not set up"});
+                    }
+                }
+            }
+
+            node.on("input", function(msg) {
+                if (msg.hasOwnProperty("extension")) {
+                    node.mydbConfig.db.loadExtension(msg.extension, function(err) {
+                        if (err) { node.error(err,msg); }
+                        else { doImport(msg); }
+                    });
+                }
+                else { doImport(msg); }
+            });
+        }
+        else {
+            node.error("DuckDB database not configured");
+        }
+    }
+    RED.nodes.registerType("duckdb import",DuckDBImport);
+
+    function DuckDBExport(n) {
+        RED.nodes.createNode(this,n);
+
+        this.mydb = n.mydb;
+        this.duckdbexport= n.duckdbexport||"msg.export";
+        this.tablename = n.exporttablename;
+        this.duckdbfile = n.duckdbexportfile;
+        this.mydbConfig = RED.nodes.getNode(this.mydb);
+        var node = this;
+        
+        if (node.mydbConfig) {
+            node.mydbConfig.doConnect();
+            node.status({fill:"green",shape:"dot",text:this.mydbConfig.dbname});
+
+            var doExport = function(msg) {
+                if (node.duckdbexport == "msg.export") {
+                    if (typeof msg.export === 'string') {
+                        node.mydbConfig.con.all(msg.export, function(err, row) {
+                            if (err) { node.error(err,msg); }
+                            else {
+                                msg.payload = row;
+                                node.send(msg);
+                            }
+                        });
+                    }
+                    else {
+                        node.error("msg.export : the query is not defined as a string",msg);
+                        node.status({fill:"red",shape:"dot",text:"msg.sql error"});
+                    }
+                }
+                if (node.duckdbexport == "export-parquet") {
+                    if (typeof node.duckdbfile === 'string' && typeof node.tablename === 'string') {
+                        if (node.duckdbfile.length > 0 && node.tablename.length > 0) {
+                            var parquetExportSql = "COPY (SELECT * FROM " + node.tablename + ") TO '" + node.duckdbfile + "' (FORMAT 'parquet');";
+                            node.mydbConfig.con.all(parquetExportSql, function(err, row) {
+                                if (err) { node.error(err, msg); }
+                                else {
+                                    msg.payload = row;
+                                    node.send(msg);
+                                }
+                            });
+                        }
+                    }
+                    else {
+                        node.error("SQL parquet import config not set up",msg);
+                        node.status({fill:"red",shape:"dot",text:"SQL import config not set up"});
+                    }
+                }
+            }
+
+            node.on("input", function(msg) {
+                if (msg.hasOwnProperty("extension")) {
+                    node.mydbConfig.db.loadExtension(msg.extension, function(err) {
+                        if (err) { node.error(err,msg); }
+                        else { doExport(msg); }
+                    });
+                }
+                else { doExport(msg); }
+            });
+        }
+        else {
+            node.error("DuckDB database not configured");
+        }
+    }
+    RED.nodes.registerType("duckdb export",DuckDBExport);
 }

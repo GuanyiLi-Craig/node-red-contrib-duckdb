@@ -27,7 +27,7 @@
         <input type="text" id="node-input-mydb">
     </div>
     <div class="form-row">
-        <label for=""><i class="fa fa-code"></i> Sql Option</label>
+        <label for=""><i class="fa fa-gear"></i> Sql Option</label>
         <select id="node-input-sqlquery">
             <option value="msg.sql">msg.sql exec</option>
             <option value="exec">sql exec</option>
@@ -37,7 +37,7 @@
         </select>
     </div>
     <div class="form-row" style="margin-bottom: 0px;">
-        <label for="" style="width: unset;" id="node-input-sqllabel"><i class="fa fa-code"></i> <span data-i18n="sqlite.label.sqlStatement"></label>
+        <label for="" style="width: unset;" id="node-input-sqllabel"><i class="fa fa-code"></i> Sql</label>
     </div>
     <div>
         <input type="hidden" id="node-input-sql" autofocus="autofocus">
@@ -126,7 +126,6 @@
     <p><strong>Database:</strong><br/>
     config database path, such as <b>/tmp/duckdb.db</b>. Or use <b>:memory:</b>. Please read offical docs <a href="https://duckdb.org/docs/connect">duck db docs</a></p>  
     <p><strong>Sql Option:</strong><br/>
-    There are 4 options. 
         <ul>
             <li><b>msg.sql exec</b>: executes the sql query(ies) from input msg.sql, and does not return any result. <a href="https://duckdb.org/docs/api/nodejs/reference#module_duckdb..Connection+exec">duckdb exec</a></li>
             <li><b>sql exec</b>: execute the sql query(ies) from code editor, and does not return any results. <a href="https://duckdb.org/docs/api/nodejs/reference#module_duckdb..Connection+exec">duckdb exec</a></li>
@@ -137,4 +136,164 @@
     </p>
     <p><strong>Code Editor:</strong><br/>
     Input SQL queries. </p>          
+</script>
+
+<script type="text/html" data-template-name="duckdb import">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-mydb"><i class="fa fa-database"></i> Database</label>
+        <input type="text" id="node-input-mydb">
+    </div>
+    <div class="form-row">
+        <label for=""><i class="fa fa-gear"></i> Import Type</label>
+        <select id="node-input-duckdbimport">
+            <option value="import-csv">csv</option>
+            <option value="import-parquet">parquet</option>
+            <option value="msg.import">msg.import</option>
+        </select>
+    </div>
+    <div class="form-row" id="node-input-duckdb-import-table-name-row">
+        <label for="node-input-importtablename"><i class="fa fa-table"></i> Table Name</label>
+        <input type="text" id="node-input-importtablename">
+    </div>
+    <div class="form-row" id="node-input-duckdb-import-file-row">
+        <label for="node-input-duckdbimportfile"><i class="fa fa-folder-open"></i> File Path</label>
+        <input type="text" id="node-input-duckdbimportfile">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('duckdb import',{
+        category: 'storage-input',
+        color:"#e97b00",
+        defaults: {
+            mydb: {type:"duckdb",required:true},
+            importtablename: {value:"",required:true},
+            duckdbimport: {value:"import-csv",required:true},
+            duckdbimportfile: {value:""},
+            name: {value:""}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "font-awesome/fa-upload",
+        label: function() {
+            var mydb = RED.nodes.node(this.mydb);
+            return this.name||(mydb?mydb.label():"duckdb import");
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            $("#node-input-duckdbimport").change(function() {
+                if ($("#node-input-duckdbimport").val() == "msg.import"){
+                    $("#node-input-duckdb-import-table-name-row").hide();
+                    $("#node-input-duckdb-import-file-row").hide();
+                }
+                else{
+                    $("#node-input-duckdb-import-table-name-row").show();
+                    $("#node-input-duckdb-import-file-row").show();
+                }
+            });
+            $("#node-input-duckdbimport").change();
+        }
+    });
+</script>
+ 
+<script type="text/html" data-help-name="duckdb import">
+    <p>A node for importing csv or parquet file to duckdb. User can pass advanced sql import to msg.import as input. (<a href="https://duckdb.org/docs/data/overview">DuckDB Import</a>)
+    <p><strong>Database:</strong><br/>
+    config database path, such as <b>/tmp/duckdb.db</b>. Or use <b>:memory:</b>. Please read offical docs <a href="https://duckdb.org/docs/connect">duck db docs</a></p>  
+    <p><strong>Import Type: </strong><br/>s
+        <ul>
+            <li><b>csv</b>: load csv file from local and create table given file path and table name. <a href="https://duckdb.org/docs/data/csv">DuckDB Import CSV</a></li>
+            <li><b>parquet</b>: load parquet file from local and create table given file path and table name. <a href="https://duckdb.org/docs/data/parquet">DuckDB Import Parquet</a></li>
+            <li><b>msg.import</b>: execute the import sql get from input msg.import . <a href="https://duckdb.org/docs/data/overview">DuckDB Import SQLs</a></li>
+        </ul>
+    </p>
+    <p><strong>Table Name:</strong><br/>
+    Input the create table name if choose csv or parquet.</p>
+    <p><strong>File Path:</strong><br/>
+    Input the csv or parquet file path.</p>          
+</script>
+
+<script type="text/html" data-template-name="duckdb export">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-mydb"><i class="fa fa-database"></i> Database</label>
+        <input type="text" id="node-input-mydb">
+    </div>
+    <div class="form-row">
+        <label for=""><i class="fa fa-gear"></i> Export Type</label>
+        <select id="node-input-duckdbexport">
+            <option value="export-parquet">parquet</option>
+            <option value="msg.export">msg.export</option>
+        </select>
+    </div>
+    <div class="form-row" id="node-input-duckdb-export-table-name-row">
+        <label for="node-input-exporttablename"><i class="fa fa-table"></i> Table Name</label>
+        <input type="text" id="node-input-exporttablename">
+    </div>
+    <div class="form-row" id="node-input-duckdb-export-file-row">
+        <label for="node-input-duckdbexportfile"><i class="fa fa-folder-open"></i> File Path</label>
+        <input type="text" id="node-input-duckdbexportfile">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('duckdb export',{
+        category: 'storage-output',
+        color:"#e97b00",
+        defaults: {
+            mydb: {type:"duckdb",required:true},
+            exporttablename: {value:"",required:true},
+            duckdbexport: {value:"export-parquet",required:true},
+            duckdbexportfile: {value:""},
+            name: {value:""}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "font-awesome/fa-download",
+        label: function() {
+            var mydb = RED.nodes.node(this.mydb);
+            return this.name||(mydb?mydb.label():"duckdb export");
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            $("#node-input-duckdbexport").change(function() {
+                if ($("#node-input-duckdbexport").val() == "msg.export"){
+                    $("#node-input-duckdb-export-file-row").hide();
+                    $("#node-input-duckdb-export-table-name-row").hide();
+                }
+                else{
+                    $("#node-input-duckdb-export-file-row").show();
+                    $("#node-input-duckdb-export-table-name-row").show();
+                }
+            });
+            $("#node-input-duckdbexport").change();
+        }
+    });
+</script>
+ 
+<script type="text/html" data-help-name="duckdb export">
+    <p>A node for exporting csv or parquet file to duckdb. User can pass advanced sql from msg.export as input. (<a href="https://duckdb.org/docs/data/overview">DuckDB Export</a>)
+    <p><strong>Database:</strong><br/>
+    config database path, such as <b>/tmp/duckdb.db</b>. Or use <b>:memory:</b>. Please read offical docs <a href="https://duckdb.org/docs/connect">duck db docs</a></p>  
+    <p><strong>Export Type: </strong><br/>
+        <ul>
+            <li><b>parquet</b>: from table export parquet file to local given file path and table name. <a href="https://duckdb.org/docs/data/parquet">DuckDB Export Parquet</a></li>
+            <li><b>msg.export</b>: execute the export sql get from input msg.export . <a href="https://duckdb.org/docs/data/overview">DuckDB export SQLs</a></li>
+        </ul>
+    </p>
+    <p><strong>Table Name:</strong><br/>
+    Input the table name if choose parquet.</p>
+    <p><strong>File Path:</strong><br/>
+    Input the parquet file path.</p>          
 </script>
