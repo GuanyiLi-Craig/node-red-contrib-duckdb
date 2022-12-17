@@ -6,7 +6,6 @@ Basic node red node for [DuckDB](https://duckdb.org/docs/).
 
 <details>
   <summary>example flow</summary>
-```json
 [
     {
         "id": "b90f4082584092f6",
@@ -218,7 +217,6 @@ Basic node red node for [DuckDB](https://duckdb.org/docs/).
         "db": ":memory:"
     }
 ]
-```
 </details>
 
 ## Config
