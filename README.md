@@ -16,7 +16,7 @@ There are some sql execution options.
 * **msg.sql exec**: executes the sql query(ies) from input msg.sql, and does not return any result. [DuckDB exec](https://duckdb.org/docs/api/nodejs/reference#module_duckdb..Connection+exec)
 * **sql exec**: execute the sql query(ies) from code editor, and does not return any results. [DuckDB exec](https://duckdb.org/docs/api/nodejs/reference#module_duckdb..Connection+exec)
 * **sql all**: execute one sql query from code editor, and returns execution results. [DuckDB all](https://duckdb.org/docs/api/nodejs/reference#module_duckdb..Connection+all)
-* **sql each**: execute one sql query from code editor, and returns row by row. [DuckDB all](https://duckdb.org/docs/api/nodejs/reference#module_duckdb..Connection+each)
+* **sql each**: execute one sql query from code editor, and returns row by row. [DuckDB each](https://duckdb.org/docs/api/nodejs/reference#module_duckdb..Connection+each)
 * **PS**: execute the sql procedure statement from code editor, taken msg.params as parameters. msg.params must be an array. And does not return any results. [example](https://duckdb.org/docs/api/c/prepared)
 
 #### Code Editor:
