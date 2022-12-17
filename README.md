@@ -3,11 +3,13 @@
 Basic node red node for [DuckDB](https://duckdb.org/docs/).
 
 
-## Config
+## Nodes
 
-#### Database:
+### Database:
 
 config database path, such as `/tmp/duckdb.db`. Or use `:memory:` Please read offical docs [DuckDB Docs](https://duckdb.org/docs/connect)
+
+### Duckdb SQL Node (duckdb-sql)
 
 #### Sql Option:
 
@@ -22,6 +24,43 @@ There are some sql execution options.
 #### Code Editor:
 
 Input SQL queries.
+
+### DuckDB Import Node (duckdb import)
+
+A node for importing csv or parquet file to duckdb. User can pass advanced sql import to msg.import as input. [DuckDB Import](https://duckdb.org/docs/data/overview)
+
+#### Database:
+config database path, such as `/tmp/duckdb.db`. Or use `:memory:`. Please read offical docs [duck db docs](https://duckdb.org/docs/connect)
+
+#### Import Type:
+
+* **csv**: load csv file from local and create table given file path and table name. [DuckDB Import CSV](https://duckdb.org/docs/data/csv)
+* **parquet**: load parquet file from local and create table given file path and table name. [DuckDB Import Parquet](https://duckdb.org/docs/data/parquet)
+* **msg.import**: execute the import sql get from input msg.import . [DuckDB Import SQLs](https://duckdb.org/docs/data/overview)
+
+#### Table Name:
+Input the create table name if choose csv or parquet.
+
+#### File Path:
+Input the csv or parquet file path.
+
+### DuckDB Export Node (dukdb export)
+
+A node for exporting csv or parquet file to duckdb. User can pass advanced sql from msg.export as input. [DuckDB Export](https://duckdb.org/docs/data/overview)
+
+#### Database:
+config database path, such as `/tmp/duckdb.db`. Or use `:memory:`. Please read offical docs [duck db docs](https://duckdb.org/docs/connect)
+
+#### Export Type:
+
+* **parquet**: from table export parquet file to local given file path and table name. [DuckDB Export Parquet](https://duckdb.org/docs/data/parquet)
+* **msg.export**: execute the export sql get from input msg.export . [DuckDB export SQLs](https://duckdb.org/docs/data/overview)
+
+#### Table Name:
+Input the table name if choose parquet.
+
+#### File Path:
+Input the parquet file path.
 
 ## Examples
 
