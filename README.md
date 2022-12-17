@@ -11,7 +11,7 @@ config database path, such as `/tmp/duckdb.db`. Or use `:memory:` Please read of
 
 #### Sql Option:
 
-There are 4 options.
+There are some sql execution options.
 
 * **msg.sql exec**: executes the sql query(ies) from input msg.sql, and does not return any result. [DuckDB exec](https://duckdb.org/docs/api/nodejs/reference#module_duckdb..Connection+exec)
 * **sql exec**: execute the sql query(ies) from code editor, and does not return any results. [DuckDB exec](https://duckdb.org/docs/api/nodejs/reference#module_duckdb..Connection+exec)
