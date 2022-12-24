@@ -494,33 +494,22 @@ module.exports = function(RED) {
                     node.script.runInContext(context);
 
                     var inputMsg = context.msg;
-                    console.log("inputMsg:", inputMsg);
 
-                    var beforeProcSql = inputMsg.beforeProc;
-                    console.log("beforeProcSql: " , beforeProcSql);
-
-                    node.mydbConfig.con.exec(beforeProcSql, function(err, _) {
+                    node.mydbConfig.con.exec(inputMsg.beforeProc, function(err, _) {
                         if (err) { node.error(err, msg); }
                         else {
-                            var procQuerySql = inputMsg.procQuery;
-                            console.log("procQuerySql: " , procQuerySql);
         
-                            node.mydbConfig.con.all(procQuerySql, function(err, rows) {
+                            node.mydbConfig.con.all(inputMsg.procQuery, function(err, rows) {
                                 if (err) { node.error(err, msg); }
                                 else {
                                     rows.forEach(row => {
-                                        console.log("inputMsg.proc: " , inputMsg.proc);
-                                        console.log("row: " , row);
                                         var resSql = inputMsg.proc(row)
-                                        console.log("resSql: " , resSql);
                                         node.mydbConfig.con.exec(resSql, function(err, _) {
                                             if (err) { node.error(err, msg); }
                                         });
                                     });
 
-                                    var afterProcSql = inputMsg.afterProc;
-                                    console.log("afterProcSql: " , afterProcSql);
-                                    node.mydbConfig.con.all(afterProcSql, function(err, row) {
+                                    node.mydbConfig.con.all(inputMsg.afterProc, function(err, row) {
                                         if (err) { node.error(err, msg); }
                                         else {
                                             msg.payload = row;
