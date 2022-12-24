@@ -198,7 +198,7 @@
         }
 
     </style>
-    <input type="hidden" id="node-input-func">
+    <input type="hidden" id="node-input-duckdbfunc">
     <input type="hidden" id="node-input-noerr">
 
     <div class="form-row">
@@ -211,8 +211,13 @@
         <input type="text" id="node-input-mydb">
     </div>
 
+    <div class="form-row" id="node-input-duckdb-func-batch-size-row">
+        <label for="node-input-duckdbfuncbatchsize"><i class="fa fa-bars"></i> Batch Size:</label>
+        <input type="number" id="node-input-duckdbfuncbatchsize" value="100">
+    </div>
+
     <div class="form-row node-text-editor-row" style="position:relative">
-        <div style="height: 220px; min-height:150px;" class="node-text-editor" id="node-input-func-editor" ></div>
+        <div style="height: 220px; min-height:150px;" class="node-text-editor" id="node-input-duckdbfunc-editor" ></div>
     </div>
 </script>
 
@@ -461,7 +466,8 @@
         defaults: {
             name: {value:"_DEFAULT_"},
             mydb: {type:"duckdb",required:true},
-            func: {value:"\nreturn msg;"},
+            duckdbfuncbatchsize: {value:100},
+            duckdbfunc: {value:"msg.beforeProc = \"CREATE TABLE <table name>(...);\"\nmsg.procQuery = \"SELECT * FROM <prev table name>\";\nmsg.proc = function(row) {\n    // transform row from proc query\n    // return insert to new table\n    return \"INSERT INTO <table name> VALUES(\" + JSON.stringify(Object.values(row)).slice(1, -1).replaceAll(\'\"\', \'\\\'\') + \");\";\n}\n\nmsg.afterProc = \"SELECT * FROM <table name> LIMIT 10;\";"},
             outputs: {value:1},
             noerr: {value:0,required:true,
                     validate: function(v, opt) {
@@ -553,7 +559,7 @@
                 return editor;
             }
 
-            this.editor = buildEditor('node-input-func-editor', this.id + "/" + "editor", true, $("#node-input-func").val(), undefined, that.libs || [], undefined, -1);
+            this.editor = buildEditor('node-input-duckdbfunc-editor', this.id + "/" + "editor", true, $("#node-input-duckdbfunc").val(), undefined, that.libs || [], undefined, -1);
             console.log(this.editor)
             RED.library.create({
                 url:"functions", // where to get the data from
@@ -594,7 +600,7 @@
                 delete node[editorName];
                 $("#"+targetName).val(val);
             }
-            disposeEditor("editor","node-input-func");
+            disposeEditor("editor","node-input-duckdbfunc");
 
             $("#node-input-noerr").val(noerr);
             this.noerr = noerr;
@@ -617,7 +623,7 @@
             $("#dialog-form .node-text-editor").css("height",height+"px");
 
             var height = size.height;
-            $("#node-input-func-editor").css("height", (height - 83)+"px");
+            $("#node-input-duckdbfunc-editor").css("height", (height - 83)+"px");
             this.editor.resize();
 
             $("#node-input-libs-container").css("height", (height - 192)+"px");
@@ -632,7 +638,7 @@
 })();
 </script>
 
-<script type="text/html" data-help-name="duckdb-proc">
+<script type="text/html" data-help-name="duckdb-func">
     <p>A node for processing rows. 
     <p><strong>Database:</strong><br/>
     config database path, such as <b>/tmp/duckdb.db</b>. Or use <b>:memory:</b>. Please read offical docs <a href="https://duckdb.org/docs/connect">duck db docs</a></p>

@@ -241,7 +241,8 @@ module.exports = function(RED) {
         var node = this;
         node.name = n.name;
         node.mydb = n.mydb;
-        node.func = n.func;
+        node.duckdbfunc = n.duckdbfunc;
+        node.duckdbfuncbatchsize = n.duckdbfuncbatchsize;
         node.outputs = n.outputs;
         node.libs = n.libs || [];
 
@@ -269,7 +270,7 @@ module.exports = function(RED) {
                     "send:function(msgs,cloneMsg){ __node__.send(__send__,__msgid__,msgs,cloneMsg);},"+
                     "done:__done__"+
                 "};\n"+
-                node.func+"\n"+
+                node.duckdbfunc+"\n"+
             "})(msg,__send__,__done__);";
 
         var handleNodeDoneCall = true;
@@ -498,12 +499,12 @@ module.exports = function(RED) {
                     node.mydbConfig.con.exec(inputMsg.beforeProc, function(err, _) {
                         if (err) { node.error(err, msg); }
                         else {
-        
+                            // apply limit to the sql size to duckdbfuncbatchsize and use offset to get all results
                             node.mydbConfig.con.all(inputMsg.procQuery, function(err, rows) {
                                 if (err) { node.error(err, msg); }
                                 else {
                                     rows.forEach(row => {
-                                        var resSql = inputMsg.proc(row)
+                                        var resSql = inputMsg.proc(row);
                                         node.mydbConfig.con.exec(resSql, function(err, _) {
                                             if (err) { node.error(err, msg); }
                                         });
