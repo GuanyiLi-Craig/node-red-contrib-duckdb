@@ -546,6 +546,10 @@ module.exports = function(RED) {
                             var response = await getAllResult(inputMsg.afterProc, node.mydbConfig.con);
                             msg.payload = response;
                         }
+                        msg.beforeProc = null;
+                        msg.afterProc = null;
+                        msg.procQuery = null;
+                        msg.proc = null;
                         node.send(msg);
                     } catch(err) {
                         node.error(err, msg);
