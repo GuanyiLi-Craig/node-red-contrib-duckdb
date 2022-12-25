@@ -202,7 +202,7 @@
     <input type="hidden" id="node-input-noerr">
 
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <div style="display: inline-block; width: calc(100% - 105px)"><input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name"></div>
     </div>
 
@@ -476,8 +476,6 @@
                         }
                         return RED._("node-red:function.error.invalid-js");
                     }},
-            initialize: {value:""},
-            finalize: {value:""},
             libs: {value: [], validate: function(v, opt) {
                 if (!v) { return true; }
                 for (var i=0,l=v.length;i<l;i++) {
@@ -541,14 +539,7 @@
                         context:true,
                         RED: true,
                         util: true,
-                        flow: true,
-                        global: true,
-                        console: true,
                         Buffer: true,
-                        setTimeout: true,
-                        clearTimeout: true,
-                        setInterval: true,
-                        clearInterval: true
                     },
                     extraLibs: extraLibs
                 });
@@ -560,7 +551,7 @@
             }
 
             this.editor = buildEditor('node-input-duckdbfunc-editor', this.id + "/" + "editor", true, $("#node-input-duckdbfunc").val(), undefined, that.libs || [], undefined, -1);
-            console.log(this.editor)
+
             RED.library.create({
                 url:"functions", // where to get the data from
                 type:"function", // the type of object the library is for
