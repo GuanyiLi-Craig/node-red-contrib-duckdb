@@ -630,17 +630,17 @@
 </script>
 
 <script type="text/html" data-help-name="duckdb func">
-    This node provided an javascript code editor for transforming each row by function msg.proc and insert the processed data into database, also be able to output the result. This node also provided a template for user.
+    <p>This node provided an javascript code editor for transforming each row by function msg.proc and insert the processed data into database, also be able to output the result. This node also provided a template for user.
 
-    <strong>Batch</strong> input defined the batch size of the process query. The value default to 100.
+    <p><strong>Batch</strong> input defined the batch size of the process query. The value default to 100.</p>
     
-    <strong>msg.beforeProc</strong> defined a sql that will be executed before the process function. Usually it should create a table to which new data insert. This field is optional.
+    <p><strong>msg.beforeProc</strong> defined a sql that will be executed before the process function. Usually it should create a table to which new data insert. This field is optional.</p>
     
-    <strong>msg.procQuery</strong> defined a sql that return data which will be processed from database. It should be a SELECT and <strong>MUST NOT</strong>> end with ;. The code will add the limit and offset for batch process. This field is required for get data from db.
+    <p><strong>msg.procQuery</strong> defined a sql that return data which will be processed from database. It should be a SELECT and <strong>MUST NOT</strong>> end with ;. The code will add the limit and offset for batch process. This field is required for get data from db.</p>
     
-    <strong>msg.proc</strong> defined a function which input is the row returned from sql defined in msg.procQuery. Function body should transform the data into some format and then return an INSERT query. The code running on background will handle the insert.
+    <p><strong>msg.proc</strong> defined a function which input is the row returned from sql defined in msg.procQuery. Function body should transform the data into some format and then return an INSERT query. The code running on background will handle the insert.</p>
     
-    <strong>msg.afterProc</strong> defined a query which will be executed after all the rows being processed. The result of this query will be added to msg.payload and pass to the next node(s). This field is optional.
+    <p><strong>msg.afterProc</strong> defined a query which will be executed after all the rows being processed. The result of this query will be added to msg.payload and pass to the next node(s). This field is optional.</p>
 </script>
 
 <script type="text/html" data-template-name="duckdb import">
