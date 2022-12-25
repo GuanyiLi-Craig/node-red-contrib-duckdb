@@ -1,3 +1,5 @@
+const { off } = require('process');
+
 module.exports = function(RED) {
     "use strict";
     var duckdb= require('duckdb');
@@ -241,14 +243,14 @@ module.exports = function(RED) {
         }
 
         var functionText = "var results = null;"+
-            "results = (async function(msg,__send__,__done__){ "+
+            "results = (async function(msg){ "+
             "var __msgid__ = msg._msgid;"+
             "var node = {"+
                 "id:__node__.id,"+
                 "name:__node__.name" +
             "};\n"+
                 node.duckdbfunc+"\n"+
-            "})(msg,__send__,__done__);";
+            "})(msg);";
 
         node.topic = n.topic;
 
@@ -315,32 +317,38 @@ module.exports = function(RED) {
 
         var processMessage = (() => {});
 
-        node.on("input", function(msg,send,done) {
-            processMessage(msg, send, done);
+        node.on("input", function(msg) {
+            processMessage(msg);
         });
 
         Promise.all(moduleLoadPromises).then(() => {
             var context = vm.createContext(sandbox);
             try {
                 node.script = vm.createScript(functionText, createVMOpt(node, ""));
-                processMessage = async function (msg, send, done) {
+                processMessage = async function (msg) {
                     context.msg = msg;
-                    context.__send__ = send;
-                    context.__done__ = done;
                     node.script.runInContext(context);
 
                     var inputMsg = context.msg;
+                    var batchSize = parseInt(node.duckdbfuncbatchsize);
+
                     try {
                         if (typeof inputMsg.beforeProc === 'string') {
                             await getExecResult(inputMsg.beforeProc, node.mydbConfig.con);
                         }
 
                         if (typeof inputMsg.procQuery === 'string') {
-                            var rows = await getAllResult(inputMsg.procQuery, node.mydbConfig.con);
-                            rows.forEach(async row => {
-                                var resSql = inputMsg.proc(row);
-                                await getExecResult(resSql, node.mydbConfig.con);
-                            });
+                            var offset = 0;
+                            do {
+                                var batchSQLQuery = inputMsg.procQuery + " LIMIT " + batchSize.toString() + " OFFSET " + offset.toString() + ";";
+                                var rows = await getAllResult(batchSQLQuery, node.mydbConfig.con);
+                                var batchResQuery = "";
+                                rows.forEach(async row => {
+                                    batchResQuery = batchResQuery + inputMsg.proc(row) + '\n';
+                                });
+                                await getExecResult(batchResQuery, node.mydbConfig.con);
+                                offset = offset + batchSize;
+                            } while (rows.length == batchSize)
                         }
 
                         if (typeof inputMsg.afterProc === 'string') {
@@ -354,14 +362,9 @@ module.exports = function(RED) {
                         node.send(msg);
                     } catch(err) {
                         node.error(err, msg);
-                        done(err);
                         return;
                     }
                 }
-
-                node.on("close", function() {
-                    done();
-                });
             }
             catch(err) {
                 updateErrorInfo(err);
