@@ -316,7 +316,7 @@ Input the parquet file path.
 
 ### 2. DuckDB Function Node
 
-![example-flow](https://github.com/GuanyiLi-Craig/static-files/blob/b8d9a56b43eaf23249cd1c9e0f2c7bb448ba96ed/node-red-contrib-duckdb/duckdb_function_example.gif)
+![example-flow](https://github.com/GuanyiLi-Craig/static-files/blob/6652e11789ea8aadad8e8329b9327985c60ec0db/node-red-contrib-duckdb/duckdb_function_example.png)
 
 <details>
   <summary>example function nodes flow</summary>
