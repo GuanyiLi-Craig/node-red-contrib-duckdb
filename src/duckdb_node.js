@@ -530,14 +530,22 @@ module.exports = function(RED) {
                     var inputMsg = context.msg;
 
                     try {
-                        await getExecResult(inputMsg.beforeProc, node.mydbConfig.con);
-                        var rows = await getAllResult(inputMsg.procQuery, node.mydbConfig.con);
-                        rows.forEach(async row => {
-                            var resSql = inputMsg.proc(row);
-                            await getExecResult(resSql, node.mydbConfig.con);
-                        });
-                        var response = await getAllResult(inputMsg.afterProc, node.mydbConfig.con);
-                        msg.payload = response;
+                        if (typeof inputMsg.beforeProc === 'string') {
+                            await getExecResult(inputMsg.beforeProc, node.mydbConfig.con);
+                        }
+
+                        if (typeof inputMsg.procQuery === 'string') {
+                            var rows = await getAllResult(inputMsg.procQuery, node.mydbConfig.con);
+                            rows.forEach(async row => {
+                                var resSql = inputMsg.proc(row);
+                                await getExecResult(resSql, node.mydbConfig.con);
+                            });
+                        }
+
+                        if (typeof inputMsg.afterProc === 'string') {
+                            var response = await getAllResult(inputMsg.afterProc, node.mydbConfig.con);
+                            msg.payload = response;
+                        }
                         node.send(msg);
                     } catch(err) {
                         node.error(err, msg);
