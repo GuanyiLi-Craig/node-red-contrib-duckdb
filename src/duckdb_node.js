@@ -243,14 +243,14 @@ module.exports = function(RED) {
         }
 
         var functionText = "var results = null;"+
-            "results = (async function(msg,__send__,__done__){ "+
+            "results = (async function(msg){ "+
             "var __msgid__ = msg._msgid;"+
             "var node = {"+
                 "id:__node__.id,"+
                 "name:__node__.name" +
             "};\n"+
                 node.duckdbfunc+"\n"+
-            "})(msg,__send__,__done__);";
+            "})(msg);";
 
         node.topic = n.topic;
 
@@ -317,18 +317,16 @@ module.exports = function(RED) {
 
         var processMessage = (() => {});
 
-        node.on("input", function(msg,send,done) {
-            processMessage(msg, send, done);
+        node.on("input", function(msg) {
+            processMessage(msg);
         });
 
         Promise.all(moduleLoadPromises).then(() => {
             var context = vm.createContext(sandbox);
             try {
                 node.script = vm.createScript(functionText, createVMOpt(node, ""));
-                processMessage = async function (msg, send, done) {
+                processMessage = async function (msg) {
                     context.msg = msg;
-                    context.__send__ = send;
-                    context.__done__ = done;
                     node.script.runInContext(context);
 
                     var inputMsg = context.msg;
@@ -364,14 +362,9 @@ module.exports = function(RED) {
                         node.send(msg);
                     } catch(err) {
                         node.error(err, msg);
-                        done(err);
                         return;
                     }
                 }
-
-                node.on("close", function() {
-                    done();
-                });
             }
             catch(err) {
                 updateErrorInfo(err);
