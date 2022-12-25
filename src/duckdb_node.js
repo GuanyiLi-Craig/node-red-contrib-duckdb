@@ -6,6 +6,39 @@ module.exports = function(RED) {
     var acorn = require("acorn");
     var acornWalk = require("acorn-walk");
 
+    function getExecResult(query, con) {
+        return new Promise(function(resolve, reject) {
+            con.exec(query, function (err, rows) {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(rows);
+            });
+        });
+    }
+
+    function getAllResult(query, con) {
+        return new Promise(function(resolve, reject) {
+            con.all(query, function (err, rows) {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(rows);
+            });
+        });
+    }
+
+    function getEachResult(query, con) {
+        return new Promise(function(resolve, reject) {
+            con.each(query, function (err, rows) {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(rows);
+            });
+        });
+    }
+
     function DuckDBNode(n) {
         RED.nodes.createNode(this,n);
 
@@ -42,17 +75,17 @@ module.exports = function(RED) {
             node.mydbConfig.doConnect();
             node.status({fill:"green",shape:"dot",text:this.mydbConfig.dbname});
 
-            var doQuery = function(msg) {
+            var doQuery = async function(msg) {
                 if (node.sqlquery == "msg.sql") {
                     if (typeof msg.sql === 'string') {
                         if (msg.sql.length > 0) {
-                            node.mydbConfig.con.exec(msg.sql, function(err, row) {
-                                if (err) { node.error(err,msg); }
-                                else {
-                                    msg.payload = row;
-                                    node.send(msg);
-                                }
-                            });
+                            try {
+                                var row = await getExecResult(msg.sql, node.mydbConfig.con);
+                                msg.payload = row;
+                                node.send(msg);
+                            } catch(err) {
+                                node.error(err, msg);
+                            }
                         }
                     }
                     else {
@@ -63,13 +96,13 @@ module.exports = function(RED) {
                 if (node.sqlquery == "all") {
                     if (typeof node.sql === 'string') {
                         if (node.sql.length > 0) {
-                            node.mydbConfig.con.all(node.sql, function(err, row) {
-                                if (err) { node.error(err, msg); }
-                                else {
-                                    msg.payload = row;
-                                    node.send(msg);
-                                }
-                            });
+                            try {
+                                var rows = await getAllResult(node.sql, node.mydbConfig.con);
+                                msg.payload = rows;
+                                node.send(msg);
+                            } catch(err) {
+                                node.error(err, msg);
+                            }
                         }
                     }
                     else {
@@ -82,13 +115,13 @@ module.exports = function(RED) {
                 if (node.sqlquery == "exec") {
                     if (typeof node.sql === 'string') {
                         if (node.sql.length > 0) {
-                            node.mydbConfig.con.exec(node.sql, function(err, row) {
-                                if (err) { node.error(err, msg); }
-                                else {
-                                    msg.payload = row;
-                                    node.send(msg);
-                                }
-                            });
+                            try {
+                                var row = await getExecResult(node.sql, node.mydbConfig.con);
+                                msg.payload = row;
+                                node.send(msg);
+                            } catch(err) {
+                                node.error(err, msg);
+                            }
                         }
                     }
                     else {
@@ -101,13 +134,13 @@ module.exports = function(RED) {
                 if (node.sqlquery == "each") {
                     if (typeof node.sql === 'string') {
                         if (node.sql.length > 0) {
-                            node.mydbConfig.con.each(node.sql, function(err, row) {
-                                if (err) { node.error(err, msg); }
-                                else {
-                                    msg.payload = row;
-                                    node.send(msg);
-                                }
-                            });
+                            try {
+                                var row = await getEachResult(node.sql, node.mydbConfig.con);
+                                msg.payload = row;
+                                node.send(msg);
+                            } catch(err) {
+                                node.error(err, msg);
+                            }
                         }
                     }
                     else {
@@ -486,7 +519,7 @@ module.exports = function(RED) {
                 node.script = vm.createScript(functionText, createVMOpt(node, ""));
                 var promise = Promise.resolve();
 
-                processMessage = function (msg, send, done) {
+                processMessage = async function (msg, send, done) {
                     var start = process.hrtime();
                     context.msg = msg;
                     context.__send__ = send;
@@ -496,31 +529,21 @@ module.exports = function(RED) {
 
                     var inputMsg = context.msg;
 
-                    node.mydbConfig.con.exec(inputMsg.beforeProc, function(err, _) {
-                        if (err) { node.error(err, msg); }
-                        else {
-                            // apply limit to the sql size to duckdbfuncbatchsize and use offset to get all results
-                            node.mydbConfig.con.all(inputMsg.procQuery, function(err, rows) {
-                                if (err) { node.error(err, msg); }
-                                else {
-                                    rows.forEach(row => {
-                                        var resSql = inputMsg.proc(row);
-                                        node.mydbConfig.con.exec(resSql, function(err, _) {
-                                            if (err) { node.error(err, msg); }
-                                        });
-                                    });
-
-                                    node.mydbConfig.con.all(inputMsg.afterProc, function(err, row) {
-                                        if (err) { node.error(err, msg); }
-                                        else {
-                                            msg.payload = row;
-                                            node.send(msg);
-                                        }
-                                    });
-                                }                                
-                            });
-                        }
-                    })
+                    try {
+                        await getExecResult(inputMsg.beforeProc, node.mydbConfig.con);
+                        var rows = await getAllResult(inputMsg.procQuery, node.mydbConfig.con);
+                        rows.forEach(async row => {
+                            var resSql = inputMsg.proc(row);
+                            await getExecResult(resSql, node.mydbConfig.con);
+                        });
+                        var response = await getAllResult(inputMsg.afterProc, node.mydbConfig.con);
+                        msg.payload = response;
+                        node.send(msg);
+                    } catch(err) {
+                        node.error(err, msg);
+                        done(err);
+                        return;
+                    }
 
                     context.results.then(function(results) {
                         sendResults(node,send,msg._msgid,results,false);
@@ -637,16 +660,16 @@ module.exports = function(RED) {
             node.mydbConfig.doConnect();
             node.status({fill:"green",shape:"dot",text:this.mydbConfig.dbname});
 
-            var doImport = function(msg) {
+            var doImport = async function(msg) {
                 if (node.duckdbimport == "msg.import") {
                     if (typeof msg.import === 'string') {
-                        node.mydbConfig.con.all(msg.import, function(err, row) {
-                            if (err) { node.error(err,msg); }
-                            else {
-                                msg.payload = row;
-                                node.send(msg);
-                            }
-                        });
+                        try {
+                            var row = await getAllResult(msg.import, node.mydbConfig.con);
+                            msg.payload = row;
+                            node.send(msg);
+                        } catch(err) {
+                            node.error(err, msg);
+                        }
                     }
                     else {
                         node.error("msg.import : the query is not defined as a string",msg);
@@ -657,13 +680,13 @@ module.exports = function(RED) {
                     if (typeof node.duckdbfile === 'string' && typeof node.tablename === 'string') {
                         if (node.duckdbfile.length > 0 && node.tablename.length > 0) {
                             var csvImportSql = "CREATE TABLE " + node.tablename + " AS SELECT * FROM '" + node.duckdbfile + "';";
-                            node.mydbConfig.con.all(csvImportSql, function(err, row) {
-                                if (err) { node.error(err, msg); }
-                                else {
-                                    msg.payload = row;
-                                    node.send(msg);
-                                }
-                            });
+                            try {
+                                var row = await getAllResult(csvImportSql, node.mydbConfig.con);
+                                msg.payload = row;
+                                node.send(msg);
+                            } catch(err) {
+                                node.error(err, msg);
+                            }
                         }
                     }
                     else {
@@ -675,13 +698,13 @@ module.exports = function(RED) {
                     if (typeof node.duckdbfile === 'string' && typeof node.tablename === 'string') {
                         if (node.duckdbfile.length > 0 && node.tablename.length > 0) {
                             var parquetImportSql = "CREATE TABLE " + node.tablename + " AS SELECT * FROM read_parquet('" + node.duckdbfile + "');";
-                            node.mydbConfig.con.all(parquetImportSql, function(err, row) {
-                                if (err) { node.error(err, msg); }
-                                else {
-                                    msg.payload = row;
-                                    node.send(msg);
-                                }
-                            });
+                            try {
+                                var row = await getAllResult(parquetImportSql, node.mydbConfig.con);
+                                msg.payload = row;
+                                node.send(msg);
+                            } catch(err) {
+                                node.error(err, msg);
+                            }
                         }
                     }
                     else {
@@ -721,16 +744,16 @@ module.exports = function(RED) {
             node.mydbConfig.doConnect();
             node.status({fill:"green",shape:"dot",text:this.mydbConfig.dbname});
 
-            var doExport = function(msg) {
+            var doExport = async function(msg) {
                 if (node.duckdbexport == "msg.export") {
                     if (typeof msg.export === 'string') {
-                        node.mydbConfig.con.all(msg.export, function(err, row) {
-                            if (err) { node.error(err,msg); }
-                            else {
-                                msg.payload = row;
-                                node.send(msg);
-                            }
-                        });
+                        try {
+                            var row = await getAllResult(msg.export, node.mydbConfig.con);
+                            msg.payload = row;
+                            node.send(msg);
+                        } catch(err) {
+                            node.error(err, msg);
+                        }                        
                     }
                     else {
                         node.error("msg.export : the query is not defined as a string",msg);
@@ -741,13 +764,13 @@ module.exports = function(RED) {
                     if (typeof node.duckdbfile === 'string' && typeof node.tablename === 'string') {
                         if (node.duckdbfile.length > 0 && node.tablename.length > 0) {
                             var parquetExportSql = "COPY (SELECT * FROM " + node.tablename + ") TO '" + node.duckdbfile + "' (FORMAT 'parquet');";
-                            node.mydbConfig.con.all(parquetExportSql, function(err, row) {
-                                if (err) { node.error(err, msg); }
-                                else {
-                                    msg.payload = row;
-                                    node.send(msg);
-                                }
-                            });
+                            try {
+                                var row = await getAllResult(parquetExportSql, node.mydbConfig.con);
+                                msg.payload = row;
+                                node.send(msg);
+                            } catch(err) {
+                                node.error(err, msg);
+                            }
                         }
                     }
                     else {
