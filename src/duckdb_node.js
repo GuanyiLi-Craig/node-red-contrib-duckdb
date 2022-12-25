@@ -1,3 +1,5 @@
+const { off } = require('process');
+
 module.exports = function(RED) {
     "use strict";
     var duckdb= require('duckdb');
@@ -330,17 +332,25 @@ module.exports = function(RED) {
                     node.script.runInContext(context);
 
                     var inputMsg = context.msg;
+                    var batchSize = parseInt(node.duckdbfuncbatchsize);
+
                     try {
                         if (typeof inputMsg.beforeProc === 'string') {
                             await getExecResult(inputMsg.beforeProc, node.mydbConfig.con);
                         }
 
                         if (typeof inputMsg.procQuery === 'string') {
-                            var rows = await getAllResult(inputMsg.procQuery, node.mydbConfig.con);
-                            rows.forEach(async row => {
-                                var resSql = inputMsg.proc(row);
-                                await getExecResult(resSql, node.mydbConfig.con);
-                            });
+                            var offset = 0;
+                            do {
+                                var batchSQLQuery = inputMsg.procQuery + " LIMIT " + batchSize.toString() + " OFFSET " + offset.toString() + ";";
+                                var rows = await getAllResult(batchSQLQuery, node.mydbConfig.con);
+                                var batchResQuery = "";
+                                rows.forEach(async row => {
+                                    batchResQuery = batchResQuery + inputMsg.proc(row) + '\n';
+                                });
+                                await getExecResult(batchResQuery, node.mydbConfig.con);
+                                offset = offset + batchSize;
+                            } while (rows.length == batchSize)
                         }
 
                         if (typeof inputMsg.afterProc === 'string') {
