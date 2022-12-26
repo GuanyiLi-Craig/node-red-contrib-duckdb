@@ -159,7 +159,7 @@ Input the parquet file path.
     },
     {
         "id": "c76990bb18d33038",
-        "type": "table-viewer",
+        "type": "duckdb",
         "z": "b90f4082584092f6",
         "name": "",
         "property": "payload",
@@ -396,7 +396,7 @@ Input the parquet file path.
     },
     {
         "id": "6be5bdb149a437b8",
-        "type": "table-viewer",
+        "type": "duckdb",
         "z": "4c80175cd8069f06",
         "name": "sql output",
         "property": "payload",
@@ -432,7 +432,7 @@ Input the parquet file path.
     },
     {
         "id": "3e0bc2e5e53e65e2",
-        "type": "table-viewer",
+        "type": "duckdb",
         "z": "4c80175cd8069f06",
         "name": "convert",
         "property": "payload",
@@ -468,7 +468,7 @@ Input the parquet file path.
     },
     {
         "id": "b7d3459fbe6a1e27",
-        "type": "table-viewer",
+        "type": "duckdb",
         "z": "4c80175cd8069f06",
         "name": "",
         "property": "payload",
@@ -503,7 +503,7 @@ Input the parquet file path.
     },
     {
         "id": "0194addb780c78f0",
-        "type": "table-viewer",
+        "type": "duckdb",
         "z": "4c80175cd8069f06",
         "name": "",
         "property": "payload",
