@@ -5,8 +5,6 @@ module.exports = function(RED) {
     var duckdb= require('duckdb');
     var util = require("util");
     var vm = require("vm");
-    var acorn = require("acorn");
-    var acornWalk = require("acorn-walk");
 
     function getExecResult(query, con) {
         return new Promise(function(resolve, reject) {
@@ -238,7 +236,7 @@ module.exports = function(RED) {
 
         node.mydbConfig = RED.nodes.getNode(this.mydb);
 
-        if (RED.settings.functionExternalModules === false && node.libs.length > 0) {
+        if (RED.settings.duckdbFuncExternalModules === false && node.libs.length > 0) {
             throw new Error(RED._("function.error.externalModuleNotAllowed"));
         }
 
@@ -377,7 +375,7 @@ module.exports = function(RED) {
     RED.nodes.registerType("duckdb func", DuckdbFuncNode, {
         dynamicModuleList: "libs",
         settings: {
-            functionExternalModules: { value: true, exportable: true }
+            duckdbFuncExternalModules: { value: true, exportable: true }
         }
     });
 

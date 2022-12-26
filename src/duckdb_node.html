@@ -438,7 +438,7 @@
 
     function getLibsList() {
         var _libs = [];
-        if (RED.settings.functionExternalModules !== false) {
+        if (RED.settings.duckdbFuncExternalModules !== false) {
             var libs = $("#node-input-libs-container").editableList("items");
             libs.each(function(i) {
                 var item = $(this);
@@ -563,7 +563,7 @@
                 ext:"js"
             });
 
-            if (RED.settings.functionExternalModules !== false) {
+            if (RED.settings.duckdbFuncExternalModules !== false) {
                 prepareLibraryConfig(that);
             }
         },
