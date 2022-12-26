@@ -3,7 +3,6 @@
     "version": "0.1.2",
     "description": "Node-red node for duckdb",
     "dependencies": {
-        "acorn": "^8.8.1",
         "duckdb": "^0.6.1"
     },
     "scripts": {
